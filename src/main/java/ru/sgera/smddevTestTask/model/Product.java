@@ -4,6 +4,8 @@ import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Objects;
 
@@ -11,8 +13,14 @@ import java.util.Objects;
 public class Product {
     @Id
     private ObjectId id;
+
+    @NotEmpty(message = "Please provide a name")
     private String name;
+
+    @NotNull(message = "Please provide a description")
     private String description;
+
+    @NotNull(message = "Please provide a list of parameters")
     private List<Parameter> parameters;
 
     public Product() {}

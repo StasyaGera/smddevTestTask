@@ -5,6 +5,7 @@ import ru.sgera.smddevTestTask.exceptions.ProductNotFoundException;
 import ru.sgera.smddevTestTask.model.Product;
 import ru.sgera.smddevTestTask.repos.ProductRepository;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,7 +20,7 @@ public class ProductController {
     }
 
     @PostMapping
-    public void create(@RequestBody Product product) {
+    public void create(@Valid @RequestBody Product product) {
         productRepo.save(product);
     }
 
