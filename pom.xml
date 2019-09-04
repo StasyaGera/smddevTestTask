@@ -10,7 +10,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>ru.sgera</groupId>
-	<artifactId>smddevTestTask2</artifactId>
+	<artifactId>smddevTestTask</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<name>smddevTestTask</name>
 	<description>Test task for Smart Design -- primitive internet shop API</description>

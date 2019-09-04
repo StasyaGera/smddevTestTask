@@ -4,7 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import ru.sgera.smddevTestTask.model.Parameter;
 import ru.sgera.smddevTestTask.model.Product;
@@ -14,12 +14,12 @@ import java.util.*;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
-@DataMongoTest
+@SpringBootTest
 public class ProductRepositoryTest {
     @Autowired
     private ProductRepository productRepo;
 
-    private String customId = "5d63e5660815ee34c046f6ff";
+//    private String customId = "5d63e5660815ee34c046f6ff";
 
     @Before
     public void clearDB() {
@@ -31,8 +31,8 @@ public class ProductRepositoryTest {
         List<String> retrieved;
 
         addProduct("iPhone X 128GB");
-        addProduct("Laptop HP Model 18f7gw236");
-        addProduct(customId, "iPhone XR 256GB");
+        addProduct("Laptop HP Model 18f7gw236", new Parameter("key", "value"));
+        addProduct("iPhone XR 256GB");
 
         // check that method returns right amount of products
         retrieved = productRepo.findByNameLike("iPhone");
@@ -47,67 +47,42 @@ public class ProductRepositoryTest {
         // check that method returns a correct product (by name)
         retrieved = productRepo.findByNameLike("iPhone XR");
         assertEquals(1, retrieved.size());
-        assertEquals("iPhone XR", retrieved.get(0));
+        assertEquals("iPhone XR 256GB", retrieved.get(0));
     }
 
     @Test
     public void findByParameters() {
         List<String> retrieved;
-        Map<String, String> params = new HashMap<>();
 
         Parameter p1v1 = new Parameter("p1", "v1");
         Parameter p2v1 = new Parameter("p2", "v1");
         Parameter p2v2 = new Parameter("p2", "v2");
         Parameter p3v1 = new Parameter("p3", "v1");
 
-        addProduct().getId();
-        addProduct(customId, p1v1, p2v1).getId();
-        addProduct(p1v1, p2v2).getId();
-        String threeParamsId = addProduct(p1v1, p2v2, p3v1).getId();
+        addProduct("no params");
+        addProduct("p1v1 and p2v1", p1v1, p2v1);
+        addProduct("p1v1 and p2v2", p1v1, p2v2);
+        addProduct("three params", p1v1, p2v2, p3v1);
 
-//        params.put(p1v1.getKey(), p1v1.getValue());
         retrieved = productRepo.findByParameter(p1v1.getKey(), p1v1.getValue());
         assertEquals(3, retrieved.size());
-        params.clear();
 
-//        params.put(p2v1.getKey(), p2v1.getValue());
+        retrieved = productRepo.findByParameter(p2v2.getKey(), p2v2.getValue());
+        assertEquals(2, retrieved.size());
+
+        retrieved = productRepo.findByParameter(p3v1.getKey(), p3v1.getValue());
+        assertEquals(1, retrieved.size());
+
         retrieved = productRepo.findByParameter(p2v1.getKey(), p2v1.getValue());
         assertEquals(1, retrieved.size());
-        params.clear();
-
-//        params.put(p1v1.getKey(), p1v1.getValue());
-//        params.put(p2v2.getKey(), p2v2.getValue());
-//        retrieved = productRepo.findByParameters(params);
-//        assertEquals(2, retrieved.size());
-//        params.clear();
-
-//        params.put(p1v1.getKey(), p1v1.getValue());
-//        params.put(p3v1.getKey(), p3v1.getValue());
-//        retrieved = productRepo.findByParameters(params);
-//        assertEquals(1, retrieved.size());
-//        assertEquals(threeParamsId, retrieved.get(0).getId());
-//        params.clear();
-
-//        params.put(p2v1.getKey(), p2v1.getValue());
-        retrieved = productRepo.findByParameter(p2v1.getKey(), p2v1.getValue());
-        assertEquals(1, retrieved.size());
-        assertEquals("iPhone XR 256GB", retrieved.get(0));
-        params.clear();
+        assertEquals("p1v1 and p2v1", retrieved.get(0));
     }
 
-    private Product addProduct(String name) {
-        return productRepo.save(new Product(name, "", new ArrayList<>()));
+    private Product addProduct(String name, Parameter... params) {
+        return productRepo.save(new Product(name, "", params));
     }
 
-    private Product addProduct(String id, String name) {
-        return productRepo.save(new Product(id, name, "", new ArrayList<>()));
-    }
-
-    private Product addProduct(Parameter... params) {
-        return productRepo.save(new Product("product", "", params));
-    }
-
-    private Product addProduct(String id, Parameter... params) {
-        return productRepo.save(new Product(id, "product", "", params));
-    }
+//    private Product addProduct(String id, String name, Parameter... params) {
+//        return productRepo.save(new Product(id, name, "", params));
+//    }
 }

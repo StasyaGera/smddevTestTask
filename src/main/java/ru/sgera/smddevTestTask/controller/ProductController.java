@@ -18,8 +18,8 @@ public class ProductController {
     private ProductRepository productRepository;
 
     @PostMapping
-    public void create(@Valid @RequestBody Product product) {
-        productRepository.save(product);
+    public String create(@Valid @RequestBody Product product) {
+        return productRepository.save(product).getId();
     }
 
     @GetMapping("/{id}")
