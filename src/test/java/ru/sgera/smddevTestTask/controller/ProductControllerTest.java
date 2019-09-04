@@ -13,6 +13,7 @@ import ru.sgera.smddevTestTask.repos.ProductRepository;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.mockito.Mockito.when;
@@ -53,27 +54,23 @@ public class ProductControllerTest {
     @Test
     public void getByName() throws Exception {
         String name1 = "name 1";
-        Product p1 = new Product(name1, "d", new ArrayList<>());
         String name2 = "name 2";
-        Product p2 = new Product(name2, "d", new ArrayList<>());
         String nameDifferent = "something new";
-        Product pDifferent = new Product(nameDifferent, "d", new ArrayList<>());
-        String nameNonexistent = "nonexistent";
 
         String commonSubstr = "name";
-        when(productRepo.findByNameLike(commonSubstr)).thenReturn(Arrays.asList(p1, p2));
+        when(productRepo.findByNameLike(commonSubstr)).thenReturn(Arrays.asList(name1, name2));
         mvc.perform(get("/products/search/" + commonSubstr))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[\"" + name1 + "\",\"" + name2 + "\"]"));
 
         String uniqueSubstr = "new";
-        when(productRepo.findByNameLike(uniqueSubstr)).thenReturn(Arrays.asList(pDifferent));
+        when(productRepo.findByNameLike(uniqueSubstr)).thenReturn(Collections.singletonList(nameDifferent));
         mvc.perform(get("/products/search/" + uniqueSubstr))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[\"" + nameDifferent + "\"]"));
 
         String nonexistentSubstr = "non";
-        when(productRepo.findByNameLike(nonexistentSubstr)).thenReturn(Arrays.asList());
+        when(productRepo.findByNameLike(nonexistentSubstr)).thenReturn(Collections.emptyList());
         mvc.perform(get("/products/search/" + nonexistentSubstr))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"));

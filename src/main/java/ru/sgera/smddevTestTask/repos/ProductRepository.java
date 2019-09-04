@@ -1,28 +1,88 @@
 package ru.sgera.smddevTestTask.repos;
 
-import com.querydsl.core.types.dsl.BooleanExpression;
-import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.stereotype.Repository;
 import ru.sgera.smddevTestTask.model.Product;
-import ru.sgera.smddevTestTask.model.QProduct;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
-public interface ProductRepository extends MongoRepository<Product, String>, QuerydslPredicateExecutor<Product> {
-    @Query(value = "{'name': {$regex : ?0, $options: 'i'}}")
-    List<Product> findByNameLike(String name);
+@Repository
+public class ProductRepository {
+    private static EntityManagerFactory entityManagerFactory;
 
-    default List<Product> findByParameters(Map<String, String> params) {
-        QProduct qProduct = new QProduct("product");
-        BooleanExpression filterByParams = qProduct.parameters.isNotEmpty();
-        for (Map.Entry<String, String> kv: params.entrySet()) {
-            filterByParams = filterByParams.and(qProduct.parameters.contains(new Product.Parameter(kv.getKey(), kv.getValue())));
-        }
-        return (List<Product>) findAll(filterByParams);
+    public ProductRepository() {
+        entityManagerFactory = Persistence.createEntityManagerFactory( "productPu" );
     }
 
-//    @Query(value = "{'parameters': {$elemMatch: {'key': ?0, 'value': ?1}}}")
-//    List<Product> findByParameter(String key, String value);
+    public void deleteAll() {
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        entityManager.getTransaction().begin();
+        entityManager.createQuery("DELETE FROM Product").executeUpdate();
+        entityManager.getTransaction().commit();
+        entityManager.close();
+    }
+
+    public Product save(Product product) {
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        entityManager.getTransaction().begin();
+        entityManager.persist(product);
+        entityManager.getTransaction().commit();
+        entityManager.close();
+        return product;
+    }
+
+    public Optional<Product> findById(String id) {
+        String query = "SELECT p FROM Product p WHERE p.id = :id";
+
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        entityManager.getTransaction().begin();
+        List<Product> result = entityManager
+                .createQuery(query, Product.class)
+                .setParameter("id", id)
+                .getResultList();
+        entityManager.getTransaction().commit();
+        entityManager.close();
+
+        if (result.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(result.get(0));
+        }
+    }
+
+    public List<String> findByNameLike(String name) {
+        String query = "SELECT p.name FROM Product p WHERE p.name LIKE :name";
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        entityManager.getTransaction().begin();
+        List<String> result = entityManager
+                .createQuery(query, String.class)
+                .setParameter("name", "%" + name + "%")
+                .getResultList();
+        entityManager.getTransaction().commit();
+        entityManager.close();
+        return result;
+    }
+
+    public List<String> findByParameter(String key, String value) {
+        String query = "SELECT p.name FROM Product p JOIN p.parameters pp WHERE pp.key = :key AND pp.value = :value";
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        entityManager.getTransaction().begin();
+        List<String> result = entityManager
+                .createQuery(query, String.class)
+                .setParameter("key", key)
+                .setParameter("value", value)
+                .getResultList();
+        entityManager.getTransaction().commit();
+        entityManager.close();
+        return result;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        entityManagerFactory.close();
+    }
 }
