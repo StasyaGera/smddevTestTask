@@ -1,5 +1,6 @@
 package ru.sgera.smddevTestTask.model;
 
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
@@ -13,8 +14,16 @@ import java.util.List;
 public class Product {
     @Id
     @Type(type = "objectid")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GenericGenerator(
+            name = "assigned-identity",
+            strategy = "ru.sgera.smddevTestTask.model.AssignedIdentityGenerator")
+    @GeneratedValue(
+            generator = "assigned-identity",
+            strategy = GenerationType.IDENTITY)
     private String id;
+
+    @Version
+    private Integer version;
 
     @NotEmpty(message = "Please provide a name")
     private String name;
