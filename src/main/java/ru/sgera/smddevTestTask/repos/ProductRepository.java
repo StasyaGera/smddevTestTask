@@ -42,17 +42,6 @@ public class ProductRepository {
 
     public Optional<Product> findById(String id) {
         return Optional.ofNullable(useEntityManager(em -> em.find(Product.class, id)));
-
-//        String query = "SELECT p FROM Product p WHERE p.id = :id";
-//        List<Product> result = useEntityManager(em -> em.createQuery(query, Product.class)
-//                .setParameter("id", id)
-//                .getResultList());
-//
-//        if (result.isEmpty()) {
-//            return Optional.empty();
-//        } else {
-//            return Optional.of(result.get(0));
-//        }
     }
 
     @SuppressWarnings("unchecked")
