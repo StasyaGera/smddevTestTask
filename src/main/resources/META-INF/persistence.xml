@@ -10,7 +10,7 @@
 
         <properties>
             <property name="hibernate.ogm.datastore.provider" value="mongodb" />
-            <property name="hibernate.ogm.datastore.host" value="localhost:27017"/>
+            <property name="hibernate.ogm.datastore.host" value="mongodb:27017"/>
             <property name="hibernate.ogm.datastore.database" value="ProductDB" />
             <property name="hibernate.ogm.datastore.create_database" value="true" />
         </properties>
